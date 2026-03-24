@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/toast";
 import Magnet from "@/app/components/reactbits/Magnet";
 import SplitText from "@/app/components/reactbits/SplitText";
 import TextMorph from "@/app/components/reactbits/TextMorph";
+import GradientText from "@/components/GradientText";
 import MessageInput from "@/app/components/MessageInput";
 import GoalSelector from "@/app/components/GoalSelector";
 import SubmitButton from "@/app/components/SubmitButton";
@@ -135,8 +136,10 @@ export default function ToneShifterApp() {
             </button>
 
             <Magnet>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground">
-                <SplitText text="Tone Shifter" />
+              <h1 className="font-display text-3xl sm:text-4xl font-bold">
+                <GradientText className="cursor-default font-display text-3xl sm:text-4xl font-bold">
+                  Tone Shifter
+                </GradientText>
               </h1>
             </Magnet>
             <p className="text-muted-foreground text-sm sm:text-base h-6">
