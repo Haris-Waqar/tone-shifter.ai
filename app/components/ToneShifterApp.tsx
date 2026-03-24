@@ -116,7 +116,7 @@ export default function ToneShifterApp() {
       />
 
       <main
-        className="min-h-screen bg-background flex items-start justify-center p-4 sm:p-6 pt-12 sm:pt-20"
+        className="min-h-screen flex items-start justify-center p-4 sm:p-6 pt-12 sm:pt-20"
         onKeyDown={handleKeyDown}
       >
         <div className="w-full max-w-2xl space-y-5">
