@@ -39,14 +39,14 @@ export async function POST(req: NextRequest) {
   const { message, goalId } = parsed.data;
   try {
     const completion = await openai.chat.completions.parse({
-      model: "gpt-4o-mini",
+      model: "gpt-5.4-mini",
       messages: [
         { role: "system", content: buildShiftPrompt(message, goalId) },
         { role: "user", content: "Please rewrite this message now." },
       ],
       response_format: zodResponseFormat(ShiftResponseSchema, "shift_response"),
       temperature: 0.8,
-      max_tokens: 1200,
+      max_completion_tokens: 1200,
     });
     // console the completion
     console.log(completion);
