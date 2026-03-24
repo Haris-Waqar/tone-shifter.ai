@@ -3,6 +3,7 @@ import { z } from "zod";
 import openai from "@/lib/openai";
 import { buildShiftPrompt, ShiftResponseSchema } from "@/lib/prompt";
 import { zodResponseFormat } from "openai/helpers/zod";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const ShiftRequestSchema = z.object({
   message: z.string().min(1).max(2000),
@@ -10,6 +11,17 @@ const ShiftRequestSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown";
+  const { allowed, retryAfter } = checkRateLimit(ip);
+  if (!allowed)
+    return NextResponse.json(
+      { error: `Rate limit exceeded. Try again in ${retryAfter}s.` },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+
   let body: unknown;
   try {
     body = await req.json();
@@ -27,7 +39,7 @@ export async function POST(req: NextRequest) {
   const { message, goalId } = parsed.data;
   try {
     const completion = await openai.chat.completions.parse({
-      model: "gpt-5.2-mini",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: buildShiftPrompt(message, goalId) },
         { role: "user", content: "Please rewrite this message now." },
