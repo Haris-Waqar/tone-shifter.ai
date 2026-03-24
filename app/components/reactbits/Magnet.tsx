@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useIsClient } from "@/lib/hooks";
 
 interface MagnetProps {
   children?: React.ReactNode;
@@ -15,6 +16,7 @@ export default function Magnet({
   radius = 120,
   strength = 0.3,
 }: MagnetProps) {
+  const isClient = useIsClient();
   const ref = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
@@ -44,6 +46,10 @@ export default function Magnet({
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [radius, strength, x, y]);
+
+  if (!isClient) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <motion.div

@@ -6,6 +6,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
+import { useIsClient } from "@/lib/hooks";
 
 interface GlowCardProps {
   className?: string;
@@ -13,6 +14,7 @@ interface GlowCardProps {
 }
 
 export default function GlowCard({ className, children }: GlowCardProps) {
+  const isClient = useIsClient();
   const ref = useRef<HTMLDivElement>(null);
 
   const mouseX = useMotionValue(0.5);
@@ -46,10 +48,12 @@ export default function GlowCard({ className, children }: GlowCardProps) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      <motion.div
-        className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: bgImage }}
-      />
+      {isClient && (
+        <motion.div
+          className="pointer-events-none absolute inset-0"
+          style={{ backgroundImage: bgImage }}
+        />
+      )}
       {children}
     </div>
   );

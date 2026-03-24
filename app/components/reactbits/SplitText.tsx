@@ -1,5 +1,6 @@
 "use client";
 import { motion, type Variants } from "framer-motion";
+import { useIsClient } from "@/lib/hooks";
 
 interface SplitTextProps {
   text: string;
@@ -21,6 +22,12 @@ const charVariant: Variants = {
 };
 
 export default function SplitText({ text, className }: SplitTextProps) {
+  const isClient = useIsClient();
+
+  if (!isClient) {
+    return <span className={className}>{text}</span>;
+  }
+
   return (
     <motion.span
       className={className}

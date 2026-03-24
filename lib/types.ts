@@ -29,3 +29,11 @@ export interface ShiftResponse {
   diagnosis: string;
   variants: ShiftVariant[];
 }
+
+export interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  message: string;
+  goalId: string;
+  response: ShiftResponse;
+}
