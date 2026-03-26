@@ -79,14 +79,16 @@ export default function HistoryPanel({
                 {entries.length > 0 && (
                   <button
                     onClick={handleClear}
-                    className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                    className="cursor-pointer text-xs text-muted-foreground hover:text-destructive transition-colors"
                   >
                     Clear all
                   </button>
                 )}
                 <button
                   onClick={onClose}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Close history"
+                  title="Close history"
+                  className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -132,7 +134,9 @@ export default function HistoryPanel({
                                   e.stopPropagation();
                                   handleRemove(entry.id);
                                 }}
-                                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                                aria-label="Delete history item"
+                                title="Delete item"
+                                className="cursor-pointer opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
                               >
                                 <Trash2 size={13} />
                               </button>

@@ -59,7 +59,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <span className="flex-1">{t.message}</span>
               <button
                 onClick={() => dismiss(t.id)}
-                className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+                aria-label="Dismiss notification"
+                title="Dismiss"
+                className="shrink-0 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
               >
                 <X size={14} />
               </button>

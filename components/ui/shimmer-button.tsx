@@ -17,7 +17,7 @@ export default function ShimmerButton({
     <button
       disabled={disabled}
       className={cn(
-        "relative w-full overflow-hidden rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all",
+        "relative w-full overflow-hidden rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-all cursor-pointer",
         disabled ? "cursor-not-allowed opacity-50" : "",
         className
       )}

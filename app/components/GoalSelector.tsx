@@ -8,12 +8,12 @@ interface GoalSelectorProps {
 
 export default function GoalSelector({ selected, onSelect }: GoalSelectorProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap justify-center gap-2">
       {TONE_GOALS.map((goal) => (
         <button
           key={goal.id}
           onClick={() => onSelect?.(goal.id)}
-          className="px-4 py-2 rounded-full text-sm font-medium transition-all border border-border bg-card text-foreground hover:border-primary"
+          className="cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all border border-border bg-card text-foreground hover:border-primary"
           style={
             selected === goal.id
               ? {
@@ -24,7 +24,7 @@ export default function GoalSelector({ selected, onSelect }: GoalSelectorProps) 
               : undefined
           }
         >
-          {goal.emoji} {goal.label}
+          {goal.label}
         </button>
       ))}
     </div>
