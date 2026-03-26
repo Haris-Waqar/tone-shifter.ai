@@ -4,6 +4,7 @@ import openai from "@/lib/openai";
 import { buildShiftPrompt, ShiftResponseSchema } from "@/lib/prompt";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { moderateUserMessage } from "@/lib/moderation";
 
 const ShiftRequestSchema = z.object({
   message: z.string().min(1).max(2000),
@@ -38,6 +39,19 @@ export async function POST(req: NextRequest) {
 
   const { message, goalId } = parsed.data;
   try {
+    const moderation = await moderateUserMessage(message);
+    if (!moderation.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            moderation.reason === "gibberish"
+              ? "Please enter a clearer message."
+              : "This message can’t be processed because it may contain unsafe content.",
+        },
+        { status: 400 }
+      );
+    }
+
     const completion = await openai.chat.completions.parse({
       model: "gpt-5.4-mini",
       messages: [
@@ -48,8 +62,6 @@ export async function POST(req: NextRequest) {
       temperature: 0.8,
       max_completion_tokens: 1200,
     });
-    // console the completion
-    console.log(completion);
     const result = completion.choices[0]?.message?.parsed;
     if (!result)
       return NextResponse.json(
