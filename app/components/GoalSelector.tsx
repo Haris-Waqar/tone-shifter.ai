@@ -1,5 +1,6 @@
 "use client";
 import { TONE_GOALS } from "@/lib/goals";
+import { cn } from "@/lib/utils";
 
 interface GoalSelectorProps {
   selected?: string | null;
@@ -9,24 +10,26 @@ interface GoalSelectorProps {
 export default function GoalSelector({ selected, onSelect }: GoalSelectorProps) {
   return (
     <div className="flex flex-wrap justify-center gap-2">
-      {TONE_GOALS.map((goal) => (
-        <button
-          key={goal.id}
-          onClick={() => onSelect?.(goal.id)}
-          className="cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all border border-border bg-card text-foreground hover:border-primary"
-          style={
-            selected === goal.id
-              ? {
-                  borderColor: goal.color,
-                  color: goal.color,
-                  backgroundColor: `${goal.color}18`,
-                }
-              : undefined
-          }
-        >
-          {goal.label}
-        </button>
-      ))}
+      {TONE_GOALS.map((goal) => {
+        const isSelected = selected === goal.id;
+        return (
+          <button
+            key={goal.id}
+            type="button"
+            onClick={() => onSelect?.(goal.id)}
+            aria-pressed={isSelected}
+            className={cn(
+              "cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all",
+              "bg-card text-foreground",
+              isSelected
+                ? "border-primary"
+                : "border-border hover:border-primary",
+            )}
+          >
+            {goal.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
