@@ -11,7 +11,7 @@ import MessageInput from "@/app/components/MessageInput";
 import GoalSelector from "@/app/components/GoalSelector";
 import SubmitButton from "@/app/components/SubmitButton";
 import DiagnosisBanner from "@/app/components/DiagnosisBanner";
-import ResultsSkeleton from "@/app/components/ResultsSkeleton";
+import { AiLoader } from "@/components/ui/ai-loader";
 import VariantCard from "@/app/components/VariantCard";
 import HistoryPanel from "@/app/components/HistoryPanel";
 
@@ -248,7 +248,7 @@ export default function ToneShifterApp() {
               >
                 {loading ? (
                   <div className="h-full min-h-0 overflow-hidden">
-                    <ResultsSkeleton />
+                    <AiLoader />
                   </div>
                 ) : response ? (
                   <motion.div

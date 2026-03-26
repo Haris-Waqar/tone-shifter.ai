@@ -8,9 +8,8 @@ interface DiagnosisBannerProps {
 export default function DiagnosisBanner({ diagnosis }: DiagnosisBannerProps) {
   if (!diagnosis) return null;
   return (
-    <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
-      <span className="font-semibold text-foreground">Diagnosis: </span>
+    <p className="text-sm leading-relaxed text-foreground">
       <SplitText text={diagnosis} />
-    </div>
+    </p>
   );
 }

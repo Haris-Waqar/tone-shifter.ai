@@ -2,7 +2,7 @@
 import type { ShiftVariant } from "@/lib/types";
 import GlowCard from "@/app/components/reactbits/GlowCard";
 import CopyButton from "@/app/components/CopyButton";
-import ToneScoreBar from "@/app/components/ToneScoreBar";
+import TonePhraseList from "@/app/components/TonePhraseList";
 
 interface VariantCardProps {
   variant?: ShiftVariant;
@@ -20,7 +20,7 @@ export default function VariantCard({ variant }: VariantCardProps) {
           <CopyButton text={variant.text} />
         </div>
         <p className="text-foreground text-sm">{variant.text}</p>
-        <ToneScoreBar score={variant.toneScore} />
+        <TonePhraseList phrases={variant.tonePhrases} />
       </div>
     </GlowCard>
   );

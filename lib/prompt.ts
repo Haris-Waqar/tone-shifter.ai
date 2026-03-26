@@ -9,12 +9,7 @@ export const ShiftResponseSchema = z.object({
         id: z.string(),
         text: z.string(),
         label: z.enum(["Subtle", "Balanced", "Bold"]),
-        toneScore: z.object({
-          assertiveness: z.number().min(0).max(100),
-          empathy: z.number().min(0).max(100),
-          clarity: z.number().min(0).max(100),
-          warmth: z.number().min(0).max(100),
-        }),
+        tonePhrases: z.array(z.string()).min(2).max(4),
       })
     )
     .max(3),
@@ -29,7 +24,11 @@ export function buildShiftPrompt(message: string, goalId: string): string {
 
 Provide:
 
-DIAGNOSIS: One sentence describing the current tone register of the original message (e.g., passive-aggressive, overly formal, too casual, etc.).
+OPENING HOOK (diagnosis field): Write a short, natural intro in normal prose—no headings, labels, or prefixes. Use two beats in one flowing paragraph (at most 2–3 sentences):
+1) Describe how the original message reads (e.g., terse and informal, slightly unclear but straightforward, overly formal, passive-aggressive).
+2) Bridge to the rewrites below with a line like "Here are three tailored rewrites" or "Below are three options tuned for your goal" (vary wording; keep it conversational).
+
+Example shape (do not copy verbatim): "The message is terse and informal, with a slightly unclear but straightforward conversational tone. Here are three tailored rewrites toward the ${goalLabel} register."
 
 VARIANTS:
 - If the original message is coherent and has clear semantic intent, return exactly 3 rewrites labeled Subtle, Balanced, and Bold:
@@ -38,11 +37,7 @@ VARIANTS:
 - Bold: ~80–90% shift — full, clear expression of the ${goalLabel} register
 - If the original message is gibberish, placeholder text, random characters, or otherwise lacks enough meaning to rewrite responsibly, return an empty array for variants.
 
-TONE SCORES: For each variant, score these 4 axes 0–100 based on the actual text (not the goal):
-- assertiveness: how direct and confident the message is
-- empathy: how warm and understanding the message is
-- clarity: how clear and unambiguous the message is
-- warmth: how friendly and approachable the message is
+For each variant, add tonePhrases: 2–4 short qualitative phrases describing how that rewrite reads (e.g., "Mild assertive", "Less clear", "More warmth"). Pick what matters for that text—you do not need to cover fixed dimensions. Phrases must reflect the variant's actual wording, not the goal in the abstract.
 
 IDs: use "subtle", "balanced", "bold" (lowercase) for the variant ids.
 

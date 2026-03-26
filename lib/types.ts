@@ -11,18 +11,12 @@ export interface ShiftRequest {
   goalId: string;
 }
 
-export interface ToneScore {
-  assertiveness: number;
-  empathy: number;
-  clarity: number;
-  warmth: number;
-}
-
 export interface ShiftVariant {
   id: string;
   text: string;
-  toneScore: ToneScore;
   label: string;
+  /** Present on new API responses; omitted on older saved history items. */
+  tonePhrases?: string[];
 }
 
 export interface ShiftResponse {
