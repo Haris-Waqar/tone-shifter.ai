@@ -5,8 +5,6 @@ import { History, RefreshCw } from "lucide-react";
 import type { HistoryEntry, ShiftResponse } from "@/lib/types";
 import { addHistoryEntry, loadHistory } from "@/lib/history";
 import { useToast } from "@/components/ui/toast";
-import Magnet from "@/app/components/reactbits/Magnet";
-import SplitText from "@/app/components/reactbits/SplitText";
 import TextMorph from "@/app/components/reactbits/TextMorph";
 import GradientText from "@/components/GradientText";
 import MessageInput from "@/app/components/MessageInput";
@@ -106,6 +104,8 @@ export default function ToneShifterApp() {
     [handleSubmit]
   );
 
+  const isCenteredState = !loading && !response;
+
   return (
     <>
       <HistoryPanel
@@ -117,7 +117,9 @@ export default function ToneShifterApp() {
       />
 
       <main
-        className="min-h-screen flex items-start justify-center p-4 sm:p-6 pt-12 sm:pt-20"
+        className={`min-h-screen flex justify-center p-4 sm:p-6 ${
+          isCenteredState ? "items-center" : "items-start pt-12 sm:pt-20"
+        }`}
         onKeyDown={handleKeyDown}
       >
         <div className="w-full max-w-2xl space-y-5">
@@ -135,13 +137,11 @@ export default function ToneShifterApp() {
               )}
             </button>
 
-            <Magnet>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold">
-                <GradientText className="cursor-default font-display text-3xl sm:text-4xl font-bold">
-                  Tone Shifter
-                </GradientText>
-              </h1>
-            </Magnet>
+            <h1 className="font-display text-4xl sm:text-5xl font-bold">
+              <GradientText className="cursor-default font-display text-4xl sm:text-5xl font-bold">
+                Tone Shifter
+              </GradientText>
+            </h1>
             <p className="text-muted-foreground text-sm sm:text-base h-6">
               <TextMorph text={loading ? SUBTITLE_LOADING : SUBTITLE_DEFAULT} />
             </p>
