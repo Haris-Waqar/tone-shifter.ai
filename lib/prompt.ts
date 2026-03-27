@@ -46,6 +46,12 @@ Constraints:
 - No meta-commentary, labels, or explanations inside the variant text itself — just the rewritten message
 - Do not invent intent or meaning that is not present in the original message
 
+Formatting (each variant \`text\` field — important for email and multi-paragraph input):
+- Preserve the same logical structure as the original: paragraph breaks, blank lines between sections, and line breaks where the user separated lines (e.g. greeting on its own line, signature block).
+- If the original includes an email subject line or "Subject: ...", keep it on its own line, then a blank line, then the body — do not run the subject into the first sentence of the body.
+- Use standard paragraph spacing: one blank line (double newline) between paragraphs; single newlines where a line break in the source clearly separates parts (e.g. after "Hi Name,").
+- Do not collapse multiple paragraphs into one dense block when the original used several paragraphs.
+
 Original message:
 """
 ${message}

@@ -19,7 +19,9 @@ export default function VariantCard({ variant }: VariantCardProps) {
           </span>
           <CopyButton text={variant.text} />
         </div>
-        <p className="text-foreground text-sm">{variant.text}</p>
+        <p className="whitespace-pre-wrap break-words text-sm text-foreground">
+          {variant.text}
+        </p>
         <TonePhraseList phrases={variant.tonePhrases} />
       </div>
     </GlowCard>
