@@ -124,7 +124,7 @@ export default function MessageInput({
                 aria-hidden
               />
             ) : (
-              <SendHorizonal className="h-4 w-4" strokeWidth={2} />
+              <SendHorizonal className="h-4 w-4 -rotate-45" strokeWidth={2} />
             )}
           </button>
         </div>

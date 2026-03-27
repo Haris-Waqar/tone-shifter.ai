@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
-import { ChevronDown, History, RefreshCw } from "lucide-react";
+import { ChevronDown, History, Plus, RefreshCw } from "lucide-react";
 import { APP_TITLE } from "@/lib/app";
 import type { HistoryEntry, ShiftResponse } from "@/lib/types";
 import { addHistoryEntry, loadHistory } from "@/lib/history";
@@ -104,6 +104,15 @@ export default function ToneShifterApp() {
     setGoalId(entry.goalId);
     setResponse(entry.response);
   }, []);
+
+  const handleStartFresh = useCallback(() => {
+    if (loading) return;
+    setMessage("");
+    setResponse(null);
+    requestAnimationFrame(() => {
+      document.getElementById("tone-shifter-message")?.focus();
+    });
+  }, [loading]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -232,15 +241,16 @@ export default function ToneShifterApp() {
           {/* Header */}
           <motion.div ref={headerRef} layout className="relative shrink-0 text-center space-y-2">
             <button
+              type="button"
               onClick={() => setHistoryOpen(true)}
               aria-label="Open history"
               title="History"
-              className="absolute right-0 top-1 flex h-4 w-4 cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+              className="absolute right-0 top-1 inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
             >
-              <span className="relative inline-flex">
-                <History size={16} />
+              <span className="relative inline-flex size-4 items-center justify-center">
+                <History className="size-4" aria-hidden />
                 {history.length > 0 && (
-                  <span className="absolute right-0 top-0 min-w-4 translate-x-1/2 -translate-y-1/2 rounded-full bg-primary px-1 py-0.5 text-center text-[10px] font-semibold leading-none text-primary-foreground">
+                  <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-primary px-1 py-0.5 text-center text-[10px] font-semibold leading-none text-primary-foreground">
                     {history.length}
                   </span>
                 )}
@@ -329,14 +339,31 @@ export default function ToneShifterApp() {
                         </button>
                       )}
                     </div>
-                    <motion.div variants={resultItem} className="flex shrink-0 justify-end pt-1">
+                    <motion.div
+                      variants={resultItem}
+                      className="flex shrink-0 items-center justify-end gap-2 pt-1"
+                    >
                       <button
+                        type="button"
+                        onClick={handleStartFresh}
+                        aria-label="Start new message"
+                        title="Start new message"
+                        className={cn(
+                          "cursor-pointer inline-flex items-center gap-1 rounded-full border border-border bg-card/90 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm",
+                          "transition-colors hover:border-primary/40 hover:bg-muted/80 hover:text-foreground"
+                        )}
+                      >
+                        <Plus className="size-3 shrink-0" strokeWidth={2.5} aria-hidden />
+                        Start fresh
+                      </button>
+                      <button
+                        type="button"
                         onClick={handleRegenerate}
                         aria-label="Regenerate results"
                         title="Regenerate"
-                        className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+                        className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
                       >
-                        <RefreshCw size={16} />
+                        <RefreshCw className="size-4" aria-hidden />
                       </button>
                     </motion.div>
                   </motion.div>
