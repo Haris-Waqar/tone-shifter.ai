@@ -14,6 +14,8 @@ import DiagnosisBanner from "@/app/components/DiagnosisBanner";
 import { AiLoader } from "@/components/ui/ai-loader";
 import VariantCard from "@/app/components/VariantCard";
 import HistoryPanel from "@/app/components/HistoryPanel";
+import { useMediaQuery } from "@/lib/hooks";
+import { cn } from "@/lib/utils";
 
 const SUBTITLE_DEFAULT = "Rewrite messages with precision-tuned emotional tone";
 const SUBTITLE_LOADING = "Shifting your tone...";
@@ -46,6 +48,7 @@ export default function ToneShifterApp() {
   const resultsScrollRef = useRef<HTMLDivElement>(null);
   const resultsContentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const isDesktopLayout = useMediaQuery("(min-width: 768px)", true);
 
   useEffect(() => {
     setHistory(loadHistory());
@@ -157,6 +160,12 @@ export default function ToneShifterApp() {
       return;
     }
 
+    if (!isDesktopLayout) {
+      setResultsHeight(null);
+      requestAnimationFrame(updateResultsScrollState);
+      return;
+    }
+
     updateResultsHeight();
 
     const handleResize = () => updateResultsHeight();
@@ -171,7 +180,19 @@ export default function ToneShifterApp() {
       window.removeEventListener("resize", handleResize);
       observer.disconnect();
     };
-  }, [loading, response, showResultsRegion, updateResultsHeight]);
+  }, [
+    loading,
+    response,
+    showResultsRegion,
+    isDesktopLayout,
+    updateResultsHeight,
+    updateResultsScrollState,
+  ]);
+
+  useEffect(() => {
+    if (!showResultsRegion || isDesktopLayout) return;
+    requestAnimationFrame(updateResultsScrollState);
+  }, [loading, response, showResultsRegion, isDesktopLayout, updateResultsScrollState]);
 
   const scrollResultsToBottom = useCallback(() => {
     const container = resultsScrollRef.current;
@@ -195,14 +216,18 @@ export default function ToneShifterApp() {
         className={`flex justify-center p-4 sm:p-6 ${
           isCenteredState
             ? "min-h-screen items-center"
-            : "h-[100dvh] overflow-hidden items-start pt-12 sm:pt-20"
+            : "max-md:min-h-[100dvh] max-md:h-auto max-md:overflow-y-auto max-md:overflow-x-hidden max-md:items-stretch max-md:pb-[max(1rem,env(safe-area-inset-bottom))] md:h-[100dvh] md:overflow-hidden md:items-start pt-12 sm:pt-20 max-md:pt-6"
         }`}
         onKeyDown={handleKeyDown}
       >
         <motion.div
           layout
           transition={{ duration: 0.35, ease: "easeInOut" }}
-          className={`w-full max-w-2xl ${showResultsRegion ? "flex h-full flex-col gap-5" : "space-y-5"}`}
+          className={`w-full max-w-2xl ${
+            showResultsRegion
+              ? "flex min-h-0 flex-col gap-5 max-md:w-full max-md:self-stretch md:h-full"
+              : "space-y-5"
+          }`}
         >
           {/* Header */}
           <motion.div ref={headerRef} layout className="relative shrink-0 text-center space-y-2">
@@ -222,8 +247,18 @@ export default function ToneShifterApp() {
               </span>
             </button>
 
-            <h1 className="font-display text-4xl sm:text-5xl font-bold">
-              <GradientText className="cursor-default font-display text-4xl sm:text-5xl font-bold">
+            <h1
+              className={cn(
+                "font-display text-4xl sm:text-5xl font-bold",
+                showResultsRegion && "max-md:text-3xl"
+              )}
+            >
+              <GradientText
+                className={cn(
+                  "cursor-default font-display text-4xl sm:text-5xl font-bold",
+                  showResultsRegion && "max-md:text-3xl"
+                )}
+              >
                 {APP_TITLE}
               </GradientText>
             </h1>
@@ -237,16 +272,18 @@ export default function ToneShifterApp() {
               <motion.div
                 key="results"
                 layout
-                className="min-h-0"
+                className="min-h-0 w-full max-md:min-h-[min(46vh,24rem)] max-md:flex-none md:min-h-0"
                 initial={{ opacity: 0, y: -18 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                style={resultsHeight ? { height: resultsHeight } : undefined}
+                style={
+                  isDesktopLayout && resultsHeight ? { height: resultsHeight } : undefined
+                }
               >
                 {loading ? (
-                  <div className="h-full min-h-0 overflow-hidden">
-                    <AiLoader />
+                  <div className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden max-md:min-h-[min(12rem,34vh)]">
+                    <AiLoader size={isDesktopLayout ? 180 : 112} />
                   </div>
                 ) : response ? (
                   <motion.div
@@ -259,7 +296,12 @@ export default function ToneShifterApp() {
                       <div
                         ref={resultsScrollRef}
                         onScroll={updateResultsScrollState}
-                        className="h-full overflow-y-auto pr-2"
+                        className={cn(
+                          "h-full overflow-y-auto pr-2",
+                          resultsScrollable &&
+                            !resultsAtBottom &&
+                            "max-md:pb-12"
+                        )}
                       >
                         <div ref={resultsContentRef} className="space-y-4 pb-1">
                           <motion.div variants={resultItem}>
@@ -277,7 +319,11 @@ export default function ToneShifterApp() {
                           onClick={scrollResultsToBottom}
                           aria-label="Scroll to bottom"
                           title="Scroll to bottom"
-                          className="absolute bottom-3 left-1/2 z-20 flex h-7 w-7 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border border-primary/55 bg-primary/35 text-white shadow-lg shadow-primary/30 backdrop-blur-md transition-colors hover:bg-primary/45"
+                          className={cn(
+                            "absolute bottom-3 z-20 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-primary/55 bg-primary/35 text-white shadow-lg shadow-primary/30 backdrop-blur-md transition-colors hover:bg-primary/45",
+                            "left-1/2 -translate-x-1/2",
+                            "max-md:left-auto max-md:right-3 max-md:translate-x-0"
+                          )}
                         >
                           <ChevronDown size={13} />
                         </button>

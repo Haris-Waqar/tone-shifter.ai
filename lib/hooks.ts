@@ -1,4 +1,24 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+
+/**
+ * Subscribes to `window.matchMedia(query)`. `serverSnapshot` is used for SSR/hydration
+ * (no `window` on the server).
+ */
+export function useMediaQuery(query: string, serverSnapshot = false): boolean {
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const mql = window.matchMedia(query);
+      const handler = () => onStoreChange();
+      mql.addEventListener("change", handler);
+      return () => mql.removeEventListener("change", handler);
+    },
+    [query]
+  );
+
+  const getSnapshot = () => window.matchMedia(query).matches;
+
+  return useSyncExternalStore(subscribe, getSnapshot, () => serverSnapshot);
+}
 
 export function useAutoResizeTextarea({
   minHeight,

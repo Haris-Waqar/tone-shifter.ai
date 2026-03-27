@@ -2,7 +2,7 @@
 import { SendHorizonal } from "lucide-react";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { useAutoResizeTextarea } from "@/lib/hooks";
+import { useAutoResizeTextarea, useMediaQuery } from "@/lib/hooks";
 import MessageComposerGlow from "@/app/components/MessageComposerGlow";
 
 const MAX_LENGTH = 2000;
@@ -28,13 +28,15 @@ export default function MessageInput({
 }: MessageInputProps) {
   const count = value.length;
   const nearLimit = count >= maxLength * 0.85;
+  const isDesktopLayout = useMediaQuery("(min-width: 768px)", true);
+  const textareaMaxHeight = isDesktopLayout ? 150 : 110;
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 56,
-    maxHeight: 220,
+    maxHeight: textareaMaxHeight,
   });
   useEffect(() => {
     adjustHeight();
-  }, [value, adjustHeight]);
+  }, [value, textareaMaxHeight, adjustHeight]);
 
   useEffect(() => {
     if (disabled) return;
@@ -63,7 +65,7 @@ export default function MessageInput({
           id="tone-shifter-message"
           ref={textareaRef}
           className={cn(
-            "min-h-[56px] max-h-[220px] w-full resize-none overflow-y-auto border-none bg-transparent",
+            "min-h-[56px] max-h-[180px] max-md:max-h-[128px] w-full resize-none overflow-y-auto border-none bg-transparent",
             "px-5 py-4 text-base leading-[1.45] text-foreground",
             "placeholder:text-muted-foreground",
             "outline-none transition-shadow focus-visible:ring-0 focus-visible:ring-offset-0",

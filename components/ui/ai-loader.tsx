@@ -1,16 +1,19 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
 export interface AiLoaderProps {
   size?: number;
   /** Label shown as animated letter ring (default matches app loading copy). */
   text?: string;
+  className?: string;
 }
 
 /**
  * AI loader from 21st.dev community (theutkarshmail / ai-loader).
  * https://21st.dev/community/components/theutkarshmail/ai-loader/default
  */
-export function AiLoader({ size = 180, text = "Shifting" }: AiLoaderProps) {
+export function AiLoader({ size = 180, text = "Shifting", className }: AiLoaderProps) {
   const letters = text.split("");
 
   return (
@@ -18,7 +21,10 @@ export function AiLoader({ size = 180, text = "Shifting" }: AiLoaderProps) {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      className="flex h-full min-h-[200px] w-full items-center justify-center"
+      className={cn(
+        "flex h-full min-h-0 w-full items-center justify-center",
+        className
+      )}
     >
       <span className="sr-only">Loading tone suggestions</span>
       <div
