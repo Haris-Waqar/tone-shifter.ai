@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TONE_GOALS } from "./goals";
+import { getPlatformPromptInstruction } from "./platform";
 
 export const ShiftResponseSchema = z.object({
   diagnosis: z.string(),
@@ -15,13 +16,30 @@ export const ShiftResponseSchema = z.object({
     .max(3),
 });
 
-export function buildShiftPrompt(message: string, goalId: string): string {
+export function buildShiftPrompt(
+  message: string,
+  goalId: string,
+  audience?: string,
+  platform?: string
+): string {
   const goal = TONE_GOALS.find((g) => g.id === goalId);
   const goalLabel = goal?.label ?? goalId;
   const goalDescription = goal?.description ?? "";
 
-  return `You are an expert communication coach specializing in tone. Your task is to rewrite the following message so it achieves the "${goalLabel}" tone (${goalDescription}).
+  const audienceBlock = audience?.trim()
+    ? `\nAudience context: The writer is addressing "${audience.trim()}". Adapt formality, warmth, directness, and word choice to fit this specific relationship and power dynamic.\n`
+    : "";
 
+  const platformInstruction =
+    platform?.trim() != null && platform.trim() !== ""
+      ? getPlatformPromptInstruction(platform.trim())
+      : undefined;
+  const platformBlock = platformInstruction
+    ? `\nPlatform context: ${platformInstruction}\n`
+    : "";
+
+  return `You are an expert communication coach specializing in tone. Your task is to rewrite the following message so it achieves the "${goalLabel}" tone (${goalDescription}).
+${audienceBlock}${platformBlock}
 Provide:
 
 OPENING HOOK (diagnosis field): Write a short, natural intro in normal prose—no headings, labels, or prefixes. Use two beats in one flowing paragraph (at most 2–3 sentences):

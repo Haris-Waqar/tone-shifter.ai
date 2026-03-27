@@ -16,6 +16,7 @@ import VariantCard from "@/app/components/VariantCard";
 import HistoryPanel from "@/app/components/HistoryPanel";
 import { useMediaQuery } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
+import { getAudiencePromptLabel } from "@/lib/audience";
 
 const SUBTITLE_DEFAULT = "Rewrite messages with precision-tuned emotional tone";
 const SUBTITLE_LOADING = "Shifting your tone...";
@@ -34,6 +35,8 @@ const resultItem: Variants = {
 
 export default function ToneShifterApp() {
   const [message, setMessage] = useState("");
+  const [audience, setAudience] = useState<string | null>(null);
+  const [platform, setPlatform] = useState<string | null>(null);
   const [goalId, setGoalId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<ShiftResponse | null>(null);
@@ -55,14 +58,25 @@ export default function ToneShifterApp() {
   }, []);
 
   const submitRequest = useCallback(
-    async (msg: string, goal: string) => {
+    async (
+      msg: string,
+      goal: string,
+      audienceId: string | null,
+      platformId: string | null
+    ) => {
       setLoading(true);
       setResponse(null);
       try {
+        const audienceLabel = getAudiencePromptLabel(audienceId);
         const res = await fetch("/api/shift", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg, goalId: goal }),
+          body: JSON.stringify({
+            message: msg,
+            goalId: goal,
+            ...(audienceLabel ? { audience: audienceLabel } : {}),
+            ...(platformId ? { platform: platformId } : {}),
+          }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -75,6 +89,8 @@ export default function ToneShifterApp() {
             timestamp: Date.now(),
             message: msg,
             goalId: goal,
+            ...(audienceId ? { audience: audienceId } : {}),
+            ...(platformId ? { platform: platformId } : {}),
             response: shifted,
           };
           addHistoryEntry(entry);
@@ -91,17 +107,19 @@ export default function ToneShifterApp() {
 
   const handleSubmit = useCallback(() => {
     if (!message.trim() || !goalId) return;
-    submitRequest(message, goalId);
-  }, [message, goalId, submitRequest]);
+    submitRequest(message, goalId, audience, platform);
+  }, [message, goalId, audience, platform, submitRequest]);
 
   const handleRegenerate = useCallback(() => {
     if (!message.trim() || !goalId) return;
-    submitRequest(message, goalId);
-  }, [message, goalId, submitRequest]);
+    submitRequest(message, goalId, audience, platform);
+  }, [message, goalId, audience, platform, submitRequest]);
 
   const handleRestore = useCallback((entry: HistoryEntry) => {
     setMessage(entry.message);
     setGoalId(entry.goalId);
+    setAudience(entry.audience ?? null);
+    setPlatform(entry.platform ?? null);
     setResponse(entry.response);
   }, []);
 
@@ -386,6 +404,10 @@ export default function ToneShifterApp() {
               onSubmit={handleSubmit}
               loading={loading}
               submitDisabled={!message.trim() || !goalId}
+              audience={audience}
+              onAudienceChange={setAudience}
+              platform={platform}
+              onPlatformChange={setPlatform}
             />
             <GoalSelector selected={goalId} onSelect={setGoalId} />
           </motion.div>

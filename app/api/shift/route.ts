@@ -9,6 +9,8 @@ import { moderateUserMessage } from "@/lib/moderation";
 const ShiftRequestSchema = z.object({
   message: z.string().min(1).max(2000),
   goalId: z.string().min(1),
+  audience: z.string().max(100).optional(),
+  platform: z.string().max(100).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
 
-  const { message, goalId } = parsed.data;
+  const { message, goalId, audience, platform } = parsed.data;
   try {
     const moderation = await moderateUserMessage(message);
     if (!moderation.allowed) {
@@ -55,7 +57,10 @@ export async function POST(req: NextRequest) {
     const completion = await openai.chat.completions.parse({
       model: "gpt-5.4-mini",
       messages: [
-        { role: "system", content: buildShiftPrompt(message, goalId) },
+        {
+          role: "system",
+          content: buildShiftPrompt(message, goalId, audience, platform),
+        },
         { role: "user", content: "Please rewrite this message now." },
       ],
       response_format: zodResponseFormat(ShiftResponseSchema, "shift_response"),

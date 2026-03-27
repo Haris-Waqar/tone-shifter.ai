@@ -9,6 +9,10 @@ export interface ToneGoal {
 export interface ShiftRequest {
   message: string;
   goalId: string;
+  /** Human-readable audience label for the prompt (e.g. "Your boss"). */
+  audience?: string;
+  /** Platform id from PLATFORM_ITEMS (e.g. "email", "slack"). */
+  platform?: string;
 }
 
 export interface ShiftVariant {
@@ -29,5 +33,9 @@ export interface HistoryEntry {
   timestamp: number;
   message: string;
   goalId: string;
+  /** Stable audience id from AUDIENCE_ITEMS, if any. */
+  audience?: string;
+  /** Stable platform id from PLATFORM_ITEMS, if any. */
+  platform?: string;
   response: ShiftResponse;
 }

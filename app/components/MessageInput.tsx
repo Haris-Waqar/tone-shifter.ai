@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAutoResizeTextarea, useMediaQuery } from "@/lib/hooks";
 import MessageComposerGlow from "@/app/components/MessageComposerGlow";
+import AudienceSelect from "@/app/components/AudienceSelect";
+import PlatformSelect from "@/app/components/PlatformSelect";
 
 const MAX_LENGTH = 2000;
 
@@ -15,6 +17,10 @@ interface MessageInputProps {
   onSubmit?: () => void;
   loading?: boolean;
   submitDisabled?: boolean;
+  audience: string | null;
+  onAudienceChange: (value: string | null) => void;
+  platform: string | null;
+  onPlatformChange: (value: string | null) => void;
 }
 
 export default function MessageInput({
@@ -25,6 +31,10 @@ export default function MessageInput({
   onSubmit,
   loading = false,
   submitDisabled = false,
+  audience,
+  onAudienceChange,
+  platform,
+  onPlatformChange,
 }: MessageInputProps) {
   const count = value.length;
   const nearLimit = count >= maxLength * 0.85;
@@ -90,13 +100,20 @@ export default function MessageInput({
         />
 
         <div className="flex shrink-0 items-center gap-3 bg-background/40 px-4 py-2.5">
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
-            <span className="text-[11px] leading-snug text-muted-foreground">
-              Enter to shift · Shift+Enter for newline
-            </span>
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
+            <AudienceSelect
+              value={audience}
+              onValueChange={onAudienceChange}
+              disabled={disabled || loading}
+            />
+            <PlatformSelect
+              value={platform}
+              onValueChange={onPlatformChange}
+              disabled={disabled || loading}
+            />
             <span
               className={cn(
-                "text-[11px] tabular-nums sm:ml-auto sm:shrink-0",
+                "ml-auto shrink-0 text-[11px] tabular-nums",
                 nearLimit ? "text-amber-400" : "text-muted-foreground"
               )}
             >
