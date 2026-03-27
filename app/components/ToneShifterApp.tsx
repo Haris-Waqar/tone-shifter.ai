@@ -16,6 +16,7 @@ import VariantCard from "@/app/components/VariantCard";
 import HistoryPanel from "@/app/components/HistoryPanel";
 import { useMediaQuery } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
+import { getAudiencePromptLabel } from "@/lib/audience";
 
 const SUBTITLE_DEFAULT = "Rewrite messages with precision-tuned emotional tone";
 const SUBTITLE_LOADING = "Shifting your tone...";
@@ -34,6 +35,8 @@ const resultItem: Variants = {
 
 export default function ToneShifterApp() {
   const [message, setMessage] = useState("");
+  const [audience, setAudience] = useState<string | null>(null);
+  const [platform, setPlatform] = useState<string | null>(null);
   const [goalId, setGoalId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<ShiftResponse | null>(null);
@@ -55,14 +58,25 @@ export default function ToneShifterApp() {
   }, []);
 
   const submitRequest = useCallback(
-    async (msg: string, goal: string) => {
+    async (
+      msg: string,
+      goal: string,
+      audienceId: string | null,
+      platformId: string | null
+    ) => {
       setLoading(true);
       setResponse(null);
       try {
+        const audienceLabel = getAudiencePromptLabel(audienceId);
         const res = await fetch("/api/shift", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg, goalId: goal }),
+          body: JSON.stringify({
+            message: msg,
+            goalId: goal,
+            ...(audienceLabel ? { audience: audienceLabel } : {}),
+            ...(platformId ? { platform: platformId } : {}),
+          }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -75,6 +89,8 @@ export default function ToneShifterApp() {
             timestamp: Date.now(),
             message: msg,
             goalId: goal,
+            ...(audienceId ? { audience: audienceId } : {}),
+            ...(platformId ? { platform: platformId } : {}),
             response: shifted,
           };
           addHistoryEntry(entry);
@@ -91,17 +107,19 @@ export default function ToneShifterApp() {
 
   const handleSubmit = useCallback(() => {
     if (!message.trim() || !goalId) return;
-    submitRequest(message, goalId);
-  }, [message, goalId, submitRequest]);
+    submitRequest(message, goalId, audience, platform);
+  }, [message, goalId, audience, platform, submitRequest]);
 
   const handleRegenerate = useCallback(() => {
     if (!message.trim() || !goalId) return;
-    submitRequest(message, goalId);
-  }, [message, goalId, submitRequest]);
+    submitRequest(message, goalId, audience, platform);
+  }, [message, goalId, audience, platform, submitRequest]);
 
   const handleRestore = useCallback((entry: HistoryEntry) => {
     setMessage(entry.message);
     setGoalId(entry.goalId);
+    setAudience(entry.audience ?? null);
+    setPlatform(entry.platform ?? null);
     setResponse(entry.response);
   }, []);
 
@@ -245,16 +263,17 @@ export default function ToneShifterApp() {
               onClick={() => setHistoryOpen(true)}
               aria-label="Open history"
               title="History"
-              className="absolute right-0 top-1 inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+              className="absolute right-0 top-1 inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
             >
-              <span className="relative inline-flex size-4 items-center justify-center">
-                <History className="size-4" aria-hidden />
-                {history.length > 0 && (
-                  <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-primary px-1 py-0.5 text-center text-[10px] font-semibold leading-none text-primary-foreground">
-                    {history.length}
-                  </span>
-                )}
-              </span>
+              <History className="size-4" aria-hidden />
+              {history.length > 0 && (
+                <span
+                  className="pointer-events-none absolute right-0 top-0 z-10 min-w-4 rounded-full bg-primary px-1 py-0.5 text-center text-[10px] font-semibold tabular-nums leading-none text-primary-foreground"
+                  aria-hidden
+                >
+                  {history.length}
+                </span>
+              )}
             </button>
 
             <h1
@@ -297,7 +316,7 @@ export default function ToneShifterApp() {
                   </div>
                 ) : response ? (
                   <motion.div
-                    className="flex h-full min-h-0 flex-col gap-4"
+                    className="flex h-full min-h-0 flex-col"
                     variants={resultsContainer}
                     initial="hidden"
                     animate="visible"
@@ -322,6 +341,33 @@ export default function ToneShifterApp() {
                               <VariantCard variant={v} />
                             </motion.div>
                           ))}
+                          <motion.div
+                            variants={resultItem}
+                            className="flex shrink-0 items-center justify-end gap-2 pt-1"
+                          >
+                            <button
+                              type="button"
+                              onClick={handleStartFresh}
+                              aria-label="Start new message"
+                              title="Start new message"
+                              className={cn(
+                                "cursor-pointer inline-flex items-center gap-1 rounded-full border border-border bg-card/90 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm",
+                                "transition-colors hover:border-primary/40 hover:bg-muted/80 hover:text-foreground"
+                              )}
+                            >
+                              <Plus className="size-3 shrink-0" strokeWidth={2.5} aria-hidden />
+                              Start fresh
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleRegenerate}
+                              aria-label="Regenerate results"
+                              title="Regenerate"
+                              className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+                            >
+                              <RefreshCw className="size-4" aria-hidden />
+                            </button>
+                          </motion.div>
                         </div>
                       </div>
                       {resultsScrollable && !resultsAtBottom && (
@@ -339,33 +385,6 @@ export default function ToneShifterApp() {
                         </button>
                       )}
                     </div>
-                    <motion.div
-                      variants={resultItem}
-                      className="flex shrink-0 items-center justify-end gap-2 pt-1"
-                    >
-                      <button
-                        type="button"
-                        onClick={handleStartFresh}
-                        aria-label="Start new message"
-                        title="Start new message"
-                        className={cn(
-                          "cursor-pointer inline-flex items-center gap-1 rounded-full border border-border bg-card/90 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm",
-                          "transition-colors hover:border-primary/40 hover:bg-muted/80 hover:text-foreground"
-                        )}
-                      >
-                        <Plus className="size-3 shrink-0" strokeWidth={2.5} aria-hidden />
-                        Start fresh
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleRegenerate}
-                        aria-label="Regenerate results"
-                        title="Regenerate"
-                        className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-                      >
-                        <RefreshCw className="size-4" aria-hidden />
-                      </button>
-                    </motion.div>
                   </motion.div>
                 ) : null}
               </motion.div>
@@ -386,6 +405,10 @@ export default function ToneShifterApp() {
               onSubmit={handleSubmit}
               loading={loading}
               submitDisabled={!message.trim() || !goalId}
+              audience={audience}
+              onAudienceChange={setAudience}
+              platform={platform}
+              onPlatformChange={setPlatform}
             />
             <GoalSelector selected={goalId} onSelect={setGoalId} />
           </motion.div>

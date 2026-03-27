@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Trash2, X, Clock } from "lucide-react";
 import type { HistoryEntry } from "@/lib/types";
 import { TONE_GOALS } from "@/lib/goals";
+import { getAudiencePromptLabel } from "@/lib/audience";
+import { getPlatformLabel } from "@/lib/platform";
 import { clearHistory, removeHistoryEntry } from "@/lib/history";
 
 interface HistoryPanelProps {
@@ -106,6 +108,8 @@ export default function HistoryPanel({
                 <AnimatePresence initial={false}>
                   {entries.map((entry) => {
                     const goal = TONE_GOALS.find((g) => g.id === entry.goalId);
+                    const audienceLabel = getAudiencePromptLabel(entry.audience ?? null);
+                    const platformLabel = getPlatformLabel(entry.platform ?? null);
                     return (
                       <motion.div
                         key={entry.id}
@@ -121,9 +125,21 @@ export default function HistoryPanel({
                         }}
                       >
                         <div className="p-3 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-foreground">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="min-w-0 text-xs font-medium text-foreground">
                               {goal?.label ?? entry.goalId}
+                              {audienceLabel ? (
+                                <span className="text-muted-foreground font-normal">
+                                  {" "}
+                                  · {audienceLabel}
+                                </span>
+                              ) : null}
+                              {platformLabel ? (
+                                <span className="text-muted-foreground font-normal">
+                                  {" "}
+                                  · {platformLabel}
+                                </span>
+                              ) : null}
                             </span>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
