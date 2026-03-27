@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { ChevronDown, History, RefreshCw } from "lucide-react";
+import { APP_TITLE } from "@/lib/app";
 import type { HistoryEntry, ShiftResponse } from "@/lib/types";
 import { addHistoryEntry, loadHistory } from "@/lib/history";
 import { useToast } from "@/components/ui/toast";
@@ -9,7 +10,6 @@ import TextMorph from "@/app/components/reactbits/TextMorph";
 import GradientText from "@/components/GradientText";
 import MessageInput from "@/app/components/MessageInput";
 import GoalSelector from "@/app/components/GoalSelector";
-import SubmitButton from "@/app/components/SubmitButton";
 import DiagnosisBanner from "@/app/components/DiagnosisBanner";
 import { AiLoader } from "@/components/ui/ai-loader";
 import VariantCard from "@/app/components/VariantCard";
@@ -35,7 +35,6 @@ export default function ToneShifterApp() {
   const [goalId, setGoalId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<ShiftResponse | null>(null);
-  const [hasRequestedShift, setHasRequestedShift] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [resultsHeight, setResultsHeight] = useState<string | null>(null);
@@ -54,7 +53,6 @@ export default function ToneShifterApp() {
 
   const submitRequest = useCallback(
     async (msg: string, goal: string) => {
-      setHasRequestedShift(true);
       setLoading(true);
       setResponse(null);
       try {
@@ -114,7 +112,7 @@ export default function ToneShifterApp() {
     [handleSubmit]
   );
 
-  const showResultsRegion = hasRequestedShift;
+  const showResultsRegion = loading || response !== null;
   const isCenteredState = !showResultsRegion;
 
   const updateResultsScrollState = useCallback(() => {
@@ -226,7 +224,7 @@ export default function ToneShifterApp() {
 
             <h1 className="font-display text-4xl sm:text-5xl font-bold">
               <GradientText className="cursor-default font-display text-4xl sm:text-5xl font-bold">
-                Tone Shifter
+                {APP_TITLE}
               </GradientText>
             </h1>
             <p className="text-muted-foreground text-sm sm:text-base h-6">
@@ -312,13 +310,11 @@ export default function ToneShifterApp() {
               onChange={setMessage}
               disabled={loading}
               maxLength={2000}
+              onSubmit={handleSubmit}
+              loading={loading}
+              submitDisabled={!message.trim() || !goalId}
             />
             <GoalSelector selected={goalId} onSelect={setGoalId} />
-            <SubmitButton
-              onClick={handleSubmit}
-              loading={loading}
-              disabled={!message.trim() || !goalId}
-            />
           </motion.div>
         </motion.div>
       </main>

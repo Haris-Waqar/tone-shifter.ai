@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import { ToastProvider } from "@/components/ui/toast";
 import DotGrid from "@/components/DotGrid";
+import { APP_TITLE } from "@/lib/app";
 import "./globals.css";
 
 const syne = Syne({
@@ -23,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tone Shifter",
+  title: APP_TITLE,
   description: "Rewrite messages with precision-tuned emotional tone",
 };
 

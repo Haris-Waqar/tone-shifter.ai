@@ -21,12 +21,19 @@ const charVariant: Variants = {
   },
 };
 
+/** Words + whitespace runs — avoids per-char inline-block, which allowed mid-word line breaks. */
+function segmentText(text: string): string[] {
+  return text.match(/\S+|\s+/g) ?? [];
+}
+
 export default function SplitText({ text, className }: SplitTextProps) {
   const isClient = useIsClient();
 
   if (!isClient) {
     return <span className={className}>{text}</span>;
   }
+
+  const segments = segmentText(text);
 
   return (
     <motion.span
@@ -35,13 +42,16 @@ export default function SplitText({ text, className }: SplitTextProps) {
       initial="hidden"
       animate="visible"
     >
-      {text.split("").map((char, i) => (
+      {segments.map((segment, i) => (
         <motion.span
           key={i}
           variants={charVariant}
-          style={{ display: "inline-block", whiteSpace: "pre" }}
+          style={{
+            display: "inline-block",
+            whiteSpace: segment.trim() === "" ? "pre" : "normal",
+          }}
         >
-          {char}
+          {segment}
         </motion.span>
       ))}
     </motion.span>

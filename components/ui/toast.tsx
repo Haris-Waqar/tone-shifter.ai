@@ -1,5 +1,6 @@
 "use client";
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
@@ -21,6 +22,11 @@ let _nextId = 0;
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const dismiss = useCallback((id: number) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -35,10 +41,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [dismiss]
   );
 
-  return (
-    <ToastContext.Provider value={{ toast }}>
-      {children}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 items-end">
+  const toastStack = (
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-end p-6">
+      <div className="pointer-events-auto flex max-w-full flex-col items-end gap-2">
         <AnimatePresence>
           {toasts.map((t) => (
             <motion.div
@@ -48,12 +53,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               exit={{ opacity: 0, y: 8, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               className={[
-                "flex items-center gap-3 rounded-lg border px-4 py-3 text-sm shadow-lg max-w-sm",
+                "flex max-w-sm items-center gap-3 rounded-lg border px-4 py-3 text-sm shadow-lg",
                 t.variant === "error"
                   ? "border-destructive/40 bg-destructive/10 text-destructive"
                   : t.variant === "success"
-                  ? "border-green-500/40 bg-green-500/10 text-green-400"
-                  : "border-border bg-card text-foreground",
+                    ? "border-green-500/40 bg-green-500/10 text-green-400"
+                    : "border-border bg-card text-foreground",
               ].join(" ")}
             >
               <span className="flex-1">{t.message}</span>
@@ -61,7 +66,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 onClick={() => dismiss(t.id)}
                 aria-label="Dismiss notification"
                 title="Dismiss"
-                className="shrink-0 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                className="shrink-0 cursor-pointer opacity-60 transition-opacity hover:opacity-100"
               >
                 <X size={14} />
               </button>
@@ -69,6 +74,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           ))}
         </AnimatePresence>
       </div>
+    </div>
+  );
+
+  return (
+    <ToastContext.Provider value={{ toast }}>
+      {children}
+      {mounted ? createPortal(toastStack, document.body) : null}
     </ToastContext.Provider>
   );
 }
