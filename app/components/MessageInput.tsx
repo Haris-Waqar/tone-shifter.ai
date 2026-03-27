@@ -3,6 +3,7 @@ import { SendHorizonal } from "lucide-react";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAutoResizeTextarea } from "@/lib/hooks";
+import MessageComposerGlow from "@/app/components/MessageComposerGlow";
 
 const MAX_LENGTH = 2000;
 
@@ -31,10 +32,17 @@ export default function MessageInput({
     minHeight: 56,
     maxHeight: 220,
   });
-
   useEffect(() => {
     adjustHeight();
   }, [value, adjustHeight]);
+
+  useEffect(() => {
+    if (disabled) return;
+    const id = requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [disabled]);
 
   const canSend =
     !disabled && !loading && !submitDisabled && value.trim().length > 0;
@@ -46,15 +54,19 @@ export default function MessageInput({
 
   return (
     <div className="w-full">
-      <div className="moon-chat-input relative overflow-hidden rounded-2xl">
+      <div className="group relative isolate w-full rounded-2xl p-[2px]">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+          <MessageComposerGlow />
+        </div>
+        <div className="relative z-10 flex flex-col overflow-hidden rounded-2xl moon-chat-input">
         <textarea
           id="tone-shifter-message"
           ref={textareaRef}
           className={cn(
-            "w-full resize-none border-none bg-transparent",
-            "text-base text-foreground placeholder:text-muted-foreground",
-            "px-5 py-4 pb-16 pr-[4.5rem] leading-[1.45]",
-            "transition-shadow outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+            "min-h-[56px] max-h-[220px] w-full resize-none overflow-y-auto border-none bg-transparent",
+            "px-5 py-4 text-base leading-[1.45] text-foreground",
+            "placeholder:text-muted-foreground",
+            "outline-none transition-shadow focus-visible:ring-0 focus-visible:ring-offset-0",
             disabled && "cursor-not-allowed opacity-50"
           )}
           placeholder="Enter your message…"
@@ -75,26 +87,24 @@ export default function MessageInput({
           aria-label="Message to rewrite"
         />
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-background/85 via-background/25 to-transparent px-4 pb-3 pt-10">
-          <div className="pointer-events-auto flex min-w-0 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
-            <span className="hidden text-[11px] text-muted-foreground sm:inline">
+        <div className="flex shrink-0 items-center gap-3 bg-background/40 px-4 py-2.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+            <span className="text-[11px] leading-snug text-muted-foreground">
               Enter to shift · Shift+Enter for newline
             </span>
             <span
               className={cn(
-                "text-[11px] tabular-nums",
+                "text-[11px] tabular-nums sm:ml-auto sm:shrink-0",
                 nearLimit ? "text-amber-400" : "text-muted-foreground"
               )}
             >
               {count}/{maxLength}
             </span>
           </div>
-        </div>
-
-        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
           <button
             type="button"
             onClick={handleSend}
+            onMouseDown={(e) => e.preventDefault()}
             disabled={!canSend}
             aria-label={loading ? "Shifting tone" : "Shift tone"}
             title="Shift tone"
@@ -115,6 +125,7 @@ export default function MessageInput({
               <SendHorizonal className="h-4 w-4" strokeWidth={2} />
             )}
           </button>
+        </div>
         </div>
       </div>
     </div>

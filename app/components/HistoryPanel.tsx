@@ -123,7 +123,7 @@ export default function HistoryPanel({
                         <div className="p-3 space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-medium text-foreground">
-                              {goal?.emoji} {goal?.label ?? entry.goalId}
+                              {goal?.label ?? entry.goalId}
                             </span>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">

@@ -181,8 +181,32 @@
       transparent 48%
     ),
     linear-gradient(180deg, var(--card) 0%, color-mix(in srgb, var(--background) 88%, var(--card)) 100%);
-  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+  /* Border is the animated glow in MessageComposerGlow */
+  border: none;
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--foreground) 6%, transparent),
     0 16px 48px -16px rgb(0 0 0 / 45%);
+}
+
+/* Message composer glow — continuous spin (hover/focus-only transitions read as “stuck” when the field stays focused). */
+@keyframes message-composer-glow-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.message-composer-glow-sweep {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 999px;
+  height: 999px;
+  animation: message-composer-glow-spin var(--glow-spin-duration, 12s) linear infinite;
+}
+
+.message-composer-glow-sweep--reverse {
+  animation-direction: reverse;
 }
